@@ -81,8 +81,7 @@ public:
     }
 
     template<typename Predicate>
-    vector<Document> FindTopDocuments(const string& raw_query,
-                                      Predicate predicate) const{
+    vector<Document> FindTopDocuments(const string& raw_query, Predicate predicate) const{
         const Query query = ParseQuery(raw_query);
         auto matched_documents = FindAllDocuments(query, predicate);
 
@@ -104,24 +103,7 @@ public:
     }
 
     vector<Document> FindTopDocuments(const string& raw_query, DocumentStatus status = DocumentStatus::ACTUAL){
-        const Query query = ParseQuery(raw_query);
-        auto matched_documents = FindAllDocuments(query, [status](int document_id, DocumentStatus document_status, int rating) { return document_status == status; });
-
-        sort(matched_documents.begin(), matched_documents.end(),
-             [](const Document& lhs, const Document& rhs) {
-                if (abs(lhs.relevance - rhs.relevance) < 1e-6) {
-                    return lhs.rating > rhs.rating;
-                } else {
-                    return lhs.relevance > rhs.relevance;
-                }
-             });
-
-
-        if (matched_documents.size() > MAX_RESULT_DOCUMENT_COUNT) {
-            matched_documents.resize(MAX_RESULT_DOCUMENT_COUNT);
-        }
-
-        return matched_documents;
+        return FindTopDocuments(raw_query, [status](int document_id, DocumentStatus document_status, int rating) { return document_status == status; });
     }
 
     int GetDocumentCount() const {
