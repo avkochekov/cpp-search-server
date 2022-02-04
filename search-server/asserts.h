@@ -19,7 +19,7 @@ void RunTestImpl(TestFunc func, const string& funcName) {
     cerr << funcName << " OK"s << endl;
 }
 
-#define RUN_TEST(func) RunTestImpl(func, #func)// напишите недостающий код
+#define RUN_TEST(func) RunTestImpl(func, #func)
 
 //=================================================================================
 template<typename Term>
