@@ -14,7 +14,7 @@ void TestAddDocumentAndFindAddedDocument() {
     const string content = "cat in the city"s;
     const vector<int> ratings = {1, 2, 3};
 
-    SearchServer server;
+    SearchServer server = SearchServer(string());
     {
         const auto found_docs = server.FindTopDocuments("cat"s);
         ASSERT(found_docs.empty());
@@ -35,7 +35,7 @@ void TestExcludeStopWordsFromDocument() {
     const string content = "cat in the city"s;
     const vector<int> ratings = {1, 2, 3};
 
-    SearchServer server;
+    SearchServer server = SearchServer(string());
     server.SetStopWords("in the"s);
     {
         const auto found_docs = server.FindTopDocuments("cat"s);
@@ -57,7 +57,7 @@ void TestMinusWordsSupport() {
     const vector<string> contents = {"cat in the city"s, "dog in the city"s, "the cat and the mouse"s};
     const vector<int> ratings = {1, 2, 3};
     {
-        SearchServer server;
+        SearchServer server = SearchServer(string());
         server.SetStopWords("in the"s);
         for (size_t i = 0; i < doc_ids.size(); ++i){
             server.AddDocument(doc_ids[i], contents[i], DocumentStatus::ACTUAL, ratings);
@@ -97,7 +97,7 @@ void TestMatchDocument() {
     const vector<string> contents = {"cat in the city"s, "dog in the city"s, "the cat and the mouse"s};
     const vector<int> ratings = {1, 2, 3};
 
-    SearchServer server;
+    SearchServer server = SearchServer(string());
     server.SetStopWords("in the"s);
 
 
@@ -129,7 +129,7 @@ void TestMatchDocument() {
 //=================================================================================
 //Сортировка найденных документов по релевантности. Возвращаемые при поиске документов результаты должны быть отсортированы в порядке убывания релевантности.
 void TestSortSocumentsByRelevance() {
-    SearchServer server;
+    SearchServer server = SearchServer(string());
     server.SetStopWords("in the"s);
     server.AddDocument(42, "cat in the city"s,          DocumentStatus::ACTUAL, {1, 2, 3});
     server.AddDocument(43, "dog in the city"s,          DocumentStatus::ACTUAL, {3, 4, 5});
@@ -165,7 +165,7 @@ void TestDocumentRatingCalculation(){
     const vector<string> contents = {"cat in the city"s, "dog in the city"s, "the cat and the mouse"s};
     const vector<int> ratings = {2, 4, 6, -2, 0};
 
-    SearchServer server;
+    SearchServer server = SearchServer(string());
     server.SetStopWords("in the"s);
 
     server.AddDocument(42, "cat in the city"s,          DocumentStatus::ACTUAL, {1, 2, 3});
@@ -188,7 +188,7 @@ void TestDocumentRatingCalculation(){
 //=================================================================================
 //Фильтрация результатов поиска с использованием предиката, задаваемого пользователем.
 void TestDocumentFiltrationWithPredicate(){
-    SearchServer server;
+    SearchServer server = SearchServer(string());
     server.SetStopWords("and in the"s);
 
     server.AddDocument(42, "cat in the city"s,          DocumentStatus::ACTUAL,     {1, 2, 3});
@@ -238,7 +238,7 @@ void TestDocumentFiltrationWithPredicate(){
 //=================================================================================
 //Поиск документов, имеющих заданный статус.
 void TestDocumentWithGivenStatus(){
-    SearchServer server;
+    SearchServer server = SearchServer(string());
     server.SetStopWords("and in the"s);
 
     {
@@ -278,7 +278,7 @@ void TestDocumentWithGivenStatus(){
 //Корректное вычисление релевантности найденных документов.
 void TestCorectDocumentRelevanceCalculation() {
 
-    SearchServer server;
+    SearchServer server = SearchServer(string());
     server.SetStopWords("and in the"s);
 
     server.AddDocument(42, "cat in the city"s,          DocumentStatus::ACTUAL, {1, 2, 3});
@@ -309,7 +309,7 @@ void TestExcludeStopWordsFromAddedDocumentContent() {
     // Сначала убеждаемся, что поиск слова, не входящего в список стоп-слов,
     // находит нужный документ
     {
-        SearchServer server;
+        SearchServer server = SearchServer(string());
         server.AddDocument(doc_id, content, DocumentStatus::ACTUAL, ratings);
         const auto found_docs = server.FindTopDocuments("in"s);
         ASSERT_EQUAL(found_docs.size(), 1U);
@@ -320,13 +320,13 @@ void TestExcludeStopWordsFromAddedDocumentContent() {
     // Затем убеждаемся, что поиск этого же слова, входящего в список стоп-слов,
     // возвращает пустой результат
     {
-        SearchServer server;
+        SearchServer server = SearchServer(string());
         server.SetStopWords("in the"s);
         server.AddDocument(doc_id, content, DocumentStatus::ACTUAL, ratings);
         ASSERT(server.FindTopDocuments("in"s).empty());
     }
     {
-        SearchServer server;
+        SearchServer server = SearchServer(string());
         server.SetStopWords(content);
         server.AddDocument(doc_id, content, DocumentStatus::ACTUAL, ratings);
         ASSERT(server.FindTopDocuments(content).empty());
@@ -336,7 +336,7 @@ void TestExcludeStopWordsFromAddedDocumentContent() {
 //=================================================================================
 // Тест проверяет количество документов на сервере
 void TestDocumentsCount(){
-    SearchServer server;
+    SearchServer server = SearchServer(string());
     ASSERT_EQUAL(server.GetDocumentCount(), 0);
     server.AddDocument(1, "work smart no hard"s, DocumentStatus::ACTUAL, {100,100,100});
     server.AddDocument(2, "work smart no hard"s, DocumentStatus::ACTUAL, {101,101,101});
