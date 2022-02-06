@@ -90,7 +90,7 @@ void AssertEqualImpl(const T& t, const U& u, const string& t_str, const string& 
 #define ASSERT_EQUAL_HINT(a, b, hint) AssertEqualImpl((a), (b), #a, #b, __FILE__, __FUNCTION__, __LINE__, (hint))
 
 //=================================================================================
-void AssertImpl(bool value, const string& expr_str, const string& file, const string& func, unsigned line,
+inline void AssertImpl(bool value, const string& expr_str, const string& file, const string& func, unsigned line,
                 const string& hint) {
     if (!value) {
         cout << file << "("s << line << "): "s << func << ": "s;
