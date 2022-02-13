@@ -1,5 +1,4 @@
-#ifndef PAGINATOR_H
-#define PAGINATOR_H
+#pragma once
 
 //=================================================================================
 #include <iostream>
@@ -62,6 +61,3 @@ std::ostream& operator<<(std::ostream& os, const IteratorRange<Iterator>& range)
     }
     return os;
 }
-
-//=================================================================================
-#endif // PAGINATOR_H

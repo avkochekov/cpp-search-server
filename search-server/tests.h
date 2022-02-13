@@ -1,9 +1,8 @@
-#ifndef TESTS_H
-#define TESTS_H
+#pragma once
 
 //=================================================================================
 // Описание сервера
-#include "searchserver.h"
+#include "search_server.h"
 // Hand-made фреймворк для юнит-тестов
 #include "asserts.h"
 
@@ -51,5 +50,3 @@ void TestExcludeStopWordsFromAddedDocumentContent();
 //=================================================================================
 // Тест проверяет количество документов на сервере
 void TestDocumentsCount();
-
-#endif // TESTS_H

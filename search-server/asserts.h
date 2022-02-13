@@ -1,8 +1,6 @@
-#ifndef ASSERTS_H
-#define ASSERTS_H
+#pragma once
 
 //=================================================================================
-#include <cstdlib>
 #include <iostream>
 #include <map>
 #include <set>
@@ -106,6 +104,3 @@ inline void AssertImpl(bool value, const string& expr_str, const string& file, c
 #define ASSERT(expr) AssertImpl(!!(expr), #expr, __FILE__, __FUNCTION__, __LINE__, ""s)
 
 #define ASSERT_HINT(expr, hint) AssertImpl(!!(expr), #expr, __FILE__, __FUNCTION__, __LINE__, (hint))
-
-//=================================================================================
-#endif // ASSERTS_H
