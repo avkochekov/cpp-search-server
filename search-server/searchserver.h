@@ -38,6 +38,12 @@ struct Document {
 };
 
 //=================================================================================
+inline ostream& operator<<(ostream& os, const Document& doc) {
+    os << "{ document_id = " << doc.id << ", relevance = " << doc.relevance << ", rating = " << doc.rating << " }";
+    return os;
+}
+
+//=================================================================================
 enum class DocumentStatus {
     ACTUAL,
     IRRELEVANT,
