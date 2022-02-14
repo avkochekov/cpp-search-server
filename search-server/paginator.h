@@ -3,6 +3,7 @@
 //=================================================================================
 #include <iostream>
 #include <vector>
+#include <cassert>
 
 //=================================================================================
 template <typename Iterator>
@@ -31,6 +32,14 @@ class Paginator{
     std::vector<IteratorRange<Iterator>> range_;
 public:
     Paginator(Iterator begin, Iterator end, const size_t page_size){
+//        assert(("Размер страницы должен быть больше 0", page_size > 0));
+        if (page_size == 0){
+            throw std::invalid_argument("Размер страницы должен быть больше 0");
+        }
+//        assert(("Неверно указан диапазон данных", end >= begin));
+        if (begin > end){
+            throw std::invalid_argument("Неверно указан диапазон данных");
+        }
         for (auto start_iter = begin; start_iter < end; start_iter += page_size) {
             auto next_iter = start_iter + page_size;
             if (next_iter > end)
