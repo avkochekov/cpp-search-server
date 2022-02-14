@@ -36,3 +36,5 @@
 *.pro.user
 
 build-*
+
+search-server/search-server.zip
