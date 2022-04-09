@@ -1,12 +1,16 @@
-#include "tests.h"
+#include "test_example_functions.h"
+#include <string>
+
+//=================================================================================
+//using namespace string_literals;
 
 //=================================================================================
 void TestAddDocumentAndFindAddedDocument() {
     const int doc_id = 42;
-    const string content = "cat in the city"s;
-    const vector<int> ratings = {1, 2, 3};
+    const std::string content = "cat in the city"s;
+    const std::vector<int> ratings = {1, 2, 3};
 
-    SearchServer server = SearchServer(string());
+    SearchServer server = SearchServer(std::string());
     {
         const auto found_docs = server.FindTopDocuments("cat"s);
         ASSERT(found_docs.empty());
@@ -23,10 +27,10 @@ void TestAddDocumentAndFindAddedDocument() {
 //=================================================================================
 void TestExcludeStopWordsFromDocument() {
     const int doc_id = 42;
-    const string content = "cat in the city"s;
-    const vector<int> ratings = {1, 2, 3};
+    const std::string content = "cat in the city"s;
+    const std::vector<int> ratings = {1, 2, 3};
 
-    SearchServer server = SearchServer(string());
+    SearchServer server = SearchServer(std::string());
     server.SetStopWords("in the"s);
     {
         const auto found_docs = server.FindTopDocuments("cat"s);
@@ -43,11 +47,11 @@ void TestExcludeStopWordsFromDocument() {
 
 //=================================================================================
 void TestMinusWordsSupport() {
-    const vector<int> doc_ids = {42, 32, 33};
-    const vector<string> contents = {"cat in the city"s, "dog in the city"s, "the cat and the mouse"s};
-    const vector<int> ratings = {1, 2, 3};
+    const std::vector<int> doc_ids = {42, 32, 33};
+    const std::vector<std::string> contents = {"cat in the city"s, "dog in the city"s, "the cat and the mouse"s};
+    const std::vector<int> ratings = {1, 2, 3};
     {
-        SearchServer server = SearchServer(string());
+        SearchServer server = SearchServer(std::string());
         server.SetStopWords("in the"s);
         for (size_t i = 0; i < doc_ids.size(); ++i){
             server.AddDocument(doc_ids[i], contents[i], DocumentStatus::ACTUAL, ratings);
@@ -81,11 +85,11 @@ void TestMinusWordsSupport() {
 
 //=================================================================================
 void TestMatchDocument() {
-    const vector<int> doc_ids = {42, 32, 33};
-    const vector<string> contents = {"cat in the city"s, "dog in the city"s, "the cat and the mouse"s};
-    const vector<int> ratings = {1, 2, 3};
+    const std::vector<int> doc_ids = {42, 32, 33};
+    const std::vector<std::string> contents = {"cat in the city"s, "dog in the city"s, "the cat and the mouse"s};
+    const std::vector<int> ratings = {1, 2, 3};
 
-    SearchServer server = SearchServer(string());
+    SearchServer server = SearchServer(std::string());
     server.SetStopWords("in the"s);
     server.AddDocument(42, "cat in the city"s,          DocumentStatus::ACTUAL, {1, 2, 3});
     server.AddDocument(43, "dog in the city"s,          DocumentStatus::ACTUAL, {3, 4, 5});
@@ -114,7 +118,7 @@ void TestMatchDocument() {
 
 //=================================================================================
 void TestSortSocumentsByRelevance() {
-    SearchServer server = SearchServer(string());
+    SearchServer server = SearchServer(std::string());
     server.SetStopWords("in the"s);
     server.AddDocument(42, "cat in the city"s,          DocumentStatus::ACTUAL, {1, 2, 3});
     server.AddDocument(43, "dog in the city"s,          DocumentStatus::ACTUAL, {3, 4, 5});
@@ -145,11 +149,11 @@ void TestSortSocumentsByRelevance() {
 
 //=================================================================================
 void TestDocumentRatingCalculation() {
-    const vector<int> doc_ids = {42, 32, 33};
-    const vector<string> contents = {"cat in the city"s, "dog in the city"s, "the cat and the mouse"s};
-    const vector<int> ratings = {2, 4, 6, -2, 0};
+    const std::vector<int> doc_ids = {42, 32, 33};
+    const std::vector<std::string> contents = {"cat in the city"s, "dog in the city"s, "the cat and the mouse"s};
+    const std::vector<int> ratings = {2, 4, 6, -2, 0};
 
-    SearchServer server = SearchServer(string());
+    SearchServer server = SearchServer(std::string());
     server.SetStopWords("in the"s);
 
     server.AddDocument(42, "cat in the city"s,          DocumentStatus::ACTUAL, {1, 2, 3});
@@ -171,7 +175,7 @@ void TestDocumentRatingCalculation() {
 
 //=================================================================================
 void TestDocumentFiltrationWithPredicate() {
-    SearchServer server = SearchServer(string());
+    SearchServer server = SearchServer(std::string());
     server.SetStopWords("and in the"s);
 
     server.AddDocument(42, "cat in the city"s,          DocumentStatus::ACTUAL,     {1, 2, 3});
@@ -220,7 +224,7 @@ void TestDocumentFiltrationWithPredicate() {
 
 //=================================================================================
 void TestDocumentWithGivenStatus() {
-    SearchServer server = SearchServer(string());
+    SearchServer server = SearchServer(std::string());
     server.SetStopWords("and in the"s);
 
     {
@@ -259,7 +263,7 @@ void TestDocumentWithGivenStatus() {
 //=================================================================================
 void TestCorectDocumentRelevanceCalculation() {
 
-    SearchServer server = SearchServer(string());
+    SearchServer server = SearchServer(std::string());
     server.SetStopWords("and in the"s);
 
     server.AddDocument(42, "cat in the city"s,          DocumentStatus::ACTUAL, {1, 2, 3});
@@ -289,7 +293,7 @@ void TestExcludeStopWordsFromAddedDocumentContent() {
     // Сначала убеждаемся, что поиск слова, не входящего в список стоп-слов,
     // находит нужный документ
     {
-        SearchServer server = SearchServer(string());
+        SearchServer server = SearchServer(std::string());
         server.AddDocument(doc_id, content, DocumentStatus::ACTUAL, ratings);
         const auto found_docs = server.FindTopDocuments("in"s);
         ASSERT_EQUAL(found_docs.size(), 1U);
@@ -300,13 +304,13 @@ void TestExcludeStopWordsFromAddedDocumentContent() {
     // Затем убеждаемся, что поиск этого же слова, входящего в список стоп-слов,
     // возвращает пустой результат
     {
-        SearchServer server = SearchServer(string());
+        SearchServer server = SearchServer(std::string());
         server.SetStopWords("in the"s);
         server.AddDocument(doc_id, content, DocumentStatus::ACTUAL, ratings);
         ASSERT(server.FindTopDocuments("in"s).empty());
     }
     {
-        SearchServer server = SearchServer(string());
+        SearchServer server = SearchServer(std::string());
         server.SetStopWords(content);
         server.AddDocument(doc_id, content, DocumentStatus::ACTUAL, ratings);
         ASSERT(server.FindTopDocuments(content).empty());
@@ -315,7 +319,7 @@ void TestExcludeStopWordsFromAddedDocumentContent() {
 
 //=================================================================================
 void TestDocumentsCount() {
-    SearchServer server = SearchServer(string());
+    SearchServer server = SearchServer(std::string());
     ASSERT_EQUAL(server.GetDocumentCount(), 0);
     server.AddDocument(1, "work smart no hard"s, DocumentStatus::ACTUAL, {100,100,100});
     server.AddDocument(2, "work smart no hard"s, DocumentStatus::ACTUAL, {101,101,101});

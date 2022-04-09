@@ -3,7 +3,6 @@
 
 //=================================================================================
 #include "search_server.h"
-#include "string_processing.h"
 
 //=================================================================================
 SearchServer::SearchServer(const std::string &stop_words_text) : SearchServer(SplitIntoWords(stop_words_text)) {}
@@ -37,7 +36,53 @@ int SearchServer::GetDocumentId(int index) const
 }
 
 //=================================================================================
+void SearchServer::RemoveDocument(int document_id)
+{
+    if (!document_ids_.count(document_id)){
+        return;
+    }
+    for (const auto &[word, freq] : GetWordFrequencies(document_id)){
+        word_to_document_freqs_[word].erase(document_id);
+    }
+    document_ids_.erase(document_id);
+    documents_.erase(document_id);
+}
+
+//=================================================================================
+const std::map<std::string, double> &SearchServer::GetWordFrequencies(int document_id) const
+{
+    static std::map<std::string, double> res;
+//    for (const auto& word : document_words_.at(document_id)){
+//        res[word] = word_to_document_freqs_.at(word).at(document_id);
+//    }
+    if (document_ids_.count(document_id) > 0){
+        for (const auto &[word, mapa] : word_to_document_freqs_){
+            // mapa ~~ std::map<int, double>    // document_id, freq
+            if (mapa.count(document_id)){
+                res[word] = mapa.at(document_id);
+            }
+        }
+    }
+    return res;
+}
+
+//=================================================================================
+std::set<int>::const_iterator SearchServer::begin() const
+{
+    return document_ids_.cbegin();
+}
+
+//=================================================================================
+std::set<int>::const_iterator SearchServer::end() const
+{
+    return document_ids_.cend();
+}
+
+//=================================================================================
 std::tuple<std::vector<std::string>, DocumentStatus> SearchServer::MatchDocument(const std::string &raw_query, int document_id) const {
+
+    LOG_DURATION(__FUNCTION__);
+
     const Query query = ParseQuery(raw_query);
     std::vector<std::string> matched_words;
     for (const std::string& word : query.plus_words) {
@@ -197,6 +242,7 @@ void SearchServer::AddDocument(int document_id, const std::string &document, Doc
                            ComputeAverageRating(ratings),
                            status
                        });
+    document_ids_.insert(document_id);
 }
 
 //=================================================================================

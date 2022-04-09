@@ -38,3 +38,6 @@
 build-*
 
 search-server/search-server.zip
+*.stash
+search-server/Makefile
+search-server/SearchServer
