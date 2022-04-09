@@ -5,6 +5,7 @@
 #include <random>
 #include <string>
 #include <vector>
+#include <execution>
 
 #include "log_duration.h"
 
@@ -53,23 +54,26 @@ vector<string> GenerateQueries(mt19937& generator, const vector<string>& diction
 }
 
 template <typename QueriesProcessor>
-void Test(string_view mark, QueriesProcessor processor, const SearchServer& search_server, const vector<string>& queries) {
-//    LOG_DURATION(mark);
+void Test(string mark, QueriesProcessor processor, const SearchServer& search_server, const vector<string>& queries) {
+    LOG_DURATION(mark);
     const auto documents_lists = processor(search_server, queries);
 }
 
 #define TEST(processor) Test(#processor, processor, search_server, queries)
 
 int main() {
-    mt19937 generator;
-    const auto dictionary = GenerateDictionary(generator, 2'000, 25);
-    const auto documents = GenerateQueries(generator, dictionary, 20'000, 10);
+    {
+        mt19937 generator;
+        const auto dictionary = GenerateDictionary(generator, 2'000, 25);
+        const auto documents = GenerateQueries(generator, dictionary, 20'000, 10);
 
-    SearchServer search_server(dictionary[0]);
-    for (size_t i = 0; i < documents.size(); ++i) {
-        search_server.AddDocument(i, documents[i], DocumentStatus::ACTUAL, {1, 2, 3});
+        SearchServer search_server(dictionary[0]);
+        for (size_t i = 0; i < documents.size(); ++i) {
+            search_server.AddDocument(i, documents[i], DocumentStatus::ACTUAL, {1, 2, 3});
+        }
+
+        const auto queries = GenerateQueries(generator, dictionary, 2'000, 7);
+        TEST(SlowProcessQueries);
+        TEST(ProcessQueries);
     }
-
-    const auto queries = GenerateQueries(generator, dictionary, 2'000, 7);
-    TEST(ProcessQueries);
 }

@@ -38,12 +38,10 @@ int SearchServer::GetDocumentId(int index) const
 //=================================================================================
 void SearchServer::RemoveDocument(int document_id)
 {
-    if (!document_ids_.count(document_id)){
-        return;
+    for(auto &[word, mapa] : word_to_document_freqs_){
+        mapa.erase(document_id);
     }
-    for (const auto &[word, freq] : GetWordFrequencies(document_id)){
-        word_to_document_freqs_[word].erase(document_id);
-    }
+    document_to_word_freqs.erase(document_id);
     document_ids_.erase(document_id);
     documents_.erase(document_id);
 }
@@ -51,19 +49,12 @@ void SearchServer::RemoveDocument(int document_id)
 //=================================================================================
 const std::map<std::string, double> &SearchServer::GetWordFrequencies(int document_id) const
 {
-    static std::map<std::string, double> res;
-//    for (const auto& word : document_words_.at(document_id)){
-//        res[word] = word_to_document_freqs_.at(word).at(document_id);
-//    }
-    if (document_ids_.count(document_id) > 0){
-        for (const auto &[word, mapa] : word_to_document_freqs_){
-            // mapa ~~ std::map<int, double>    // document_id, freq
-            if (mapa.count(document_id)){
-                res[word] = mapa.at(document_id);
-            }
-        }
+    if (document_to_word_freqs.count(document_id)){
+        return document_to_word_freqs.at(document_id);
+    } else {
+        static std::map<std::string, double> empty;
+        return empty;
     }
-    return res;
 }
 
 //=================================================================================
@@ -159,12 +150,7 @@ bool SearchServer::IsValidDocumentId(const int id) const
 //=================================================================================
 bool SearchServer::IsUniqueDocumentId(const int id) const
 {
-    for (const auto& [doc_id, doc] : documents_){
-        if (doc_id == id){
-            return false;
-        }
-    }
-    return true;
+    return document_ids_.count(id) == 0;
 }
 
 //=================================================================================
@@ -236,6 +222,7 @@ void SearchServer::AddDocument(int document_id, const std::string &document, Doc
     const double inv_word_count = 1.0 / words.size();
     for (const std::string& word : words) {
         word_to_document_freqs_[word][document_id] += inv_word_count;
+        document_to_word_freqs[document_id][word] += inv_word_count;
     }
     documents_.emplace(document_id,
                        DocumentData{

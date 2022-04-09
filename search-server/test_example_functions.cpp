@@ -2,7 +2,7 @@
 #include <string>
 
 //=================================================================================
-//using namespace string_literals;
+using std::string_literals::operator""s;
 
 //=================================================================================
 void TestAddDocumentAndFindAddedDocument() {

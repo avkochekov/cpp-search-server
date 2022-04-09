@@ -34,6 +34,7 @@ class SearchServer {
 
     std::map<int, DocumentData> documents_;
     std::set<int> document_ids_;
+    std::map<int, std::map<std::string, double>> document_to_word_freqs;
 
 public:
     template <typename StringContainer>
@@ -93,9 +94,6 @@ SearchServer::SearchServer(const StringContainer& stop_words)
 
 template<typename Predicate>
 std::vector<Document> SearchServer::FindTopDocuments(const std::string& raw_query, Predicate predicate) const {
-
-    LOG_DURATION(__FUNCTION__);
-
     const Query query = ParseQuery(raw_query);
     auto matched_documents = FindAllDocuments(query, predicate);
 
