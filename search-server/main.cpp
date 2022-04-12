@@ -1,11 +1,10 @@
 #include "search_server.h"
-#include "process_queries.h"
 
+#include <execution>
 #include <iostream>
 #include <random>
 #include <string>
 #include <vector>
-#include <execution>
 
 #include "log_duration.h"
 
@@ -32,12 +31,14 @@ vector<string> GenerateDictionary(mt19937& generator, int word_count, int max_le
     return words;
 }
 
-string GenerateQuery(mt19937& generator, const vector<string>& dictionary, int max_word_count) {
-    const int word_count = uniform_int_distribution(1, max_word_count)(generator);
+string GenerateQuery(mt19937& generator, const vector<string>& dictionary, int word_count, double minus_prob = 0) {
     string query;
     for (int i = 0; i < word_count; ++i) {
         if (!query.empty()) {
             query.push_back(' ');
+        }
+        if (uniform_real_distribution<>(0, 1)(generator) < minus_prob) {
+            query.push_back('-');
         }
         query += dictionary[uniform_int_distribution<int>(0, dictionary.size() - 1)(generator)];
     }
@@ -53,27 +54,33 @@ vector<string> GenerateQueries(mt19937& generator, const vector<string>& diction
     return queries;
 }
 
-template <typename QueriesProcessor>
-void Test(string mark, QueriesProcessor processor, const SearchServer& search_server, const vector<string>& queries) {
+template <typename ExecutionPolicy>
+void Test(string mark, SearchServer search_server, const string& query, ExecutionPolicy&& policy) {
     LOG_DURATION(mark);
-    const auto documents_lists = processor(search_server, queries);
+    const int document_count = search_server.GetDocumentCount();
+    int word_count = 0;
+    for (int id = 0; id < document_count; ++id) {
+        const auto [words, status] = search_server.MatchDocument(policy, query, id);
+        word_count += words.size();
+    }
+    cout << word_count << endl;
 }
 
-#define TEST(processor) Test(#processor, processor, search_server, queries)
+#define TEST(policy) Test(#policy, search_server, query, execution::policy)
 
 int main() {
-    {
-        mt19937 generator;
-        const auto dictionary = GenerateDictionary(generator, 2'000, 25);
-        const auto documents = GenerateQueries(generator, dictionary, 20'000, 10);
+    mt19937 generator;
 
-        SearchServer search_server(dictionary[0]);
-        for (size_t i = 0; i < documents.size(); ++i) {
-            search_server.AddDocument(i, documents[i], DocumentStatus::ACTUAL, {1, 2, 3});
-        }
+    const auto dictionary = GenerateDictionary(generator, 1000, 10);
+    const auto documents = GenerateQueries(generator, dictionary, 10'000, 70);
 
-        const auto queries = GenerateQueries(generator, dictionary, 2'000, 7);
-        TEST(SlowProcessQueries);
-        TEST(ProcessQueries);
+    const string query = GenerateQuery(generator, dictionary, 500, 0.1);
+
+    SearchServer search_server(dictionary[0]);
+    for (size_t i = 0; i < documents.size(); ++i) {
+        search_server.AddDocument(i, documents[i], DocumentStatus::ACTUAL, {1, 2, 3});
     }
+
+    TEST(seq);
+    TEST(par);
 }
