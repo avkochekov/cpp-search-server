@@ -6,16 +6,14 @@
 #include <set>
 
 //=================================================================================
-std::vector<std::string_view> SplitIntoWords(const std::string_view text);
-
-using TransparentStringSet = std::set<std::string, std::less<>>;
+std::vector<std::string> SplitIntoWords(const std::string text);
 
 template <typename StringContainer>
-TransparentStringSet MakeUniqueNonEmptyStrings(const StringContainer& strings) {
-    TransparentStringSet non_empty_strings;
-    for (const std::string_view str : strings) {
+std::set<std::string> MakeUniqueNonEmptyStrings(const StringContainer& strings) {
+    std::set<std::string> non_empty_strings;
+    for (const std::string& str : strings) {
         if (!str.empty()) {
-            non_empty_strings.insert(std::string(str));
+            non_empty_strings.insert(str);
         }
     }
     return non_empty_strings;
