@@ -1,6 +1,7 @@
 #include <cmath>
 #include <numeric>
 #include <list>
+#include <future>
 
 #include <cassert>
 
@@ -14,9 +15,20 @@ SearchServer::SearchServer(const std::string_view stop_words_text) : SearchServe
 SearchServer::SearchServer(const std::string stop_words_text) : SearchServer(std::string_view(stop_words_text)) {}
 
 //=================================================================================
-std::vector<Document> SearchServer::FindTopDocuments(const std::string &raw_query, DocumentStatus status) const {
+std::vector<Document> SearchServer::FindTopDocuments(const std::string_view raw_query, DocumentStatus status) const {
     return FindTopDocuments(raw_query, [status]([[maybe_unused]] int document_id, DocumentStatus document_status, [[maybe_unused]]int rating) { return document_status == status; });
 }
+
+std::vector<Document> SearchServer::FindTopDocuments(__pstl::execution::sequenced_policy, const std::string_view raw_query, DocumentStatus status) const
+{
+    return FindTopDocuments(std::execution::seq, raw_query, [status]([[maybe_unused]] int document_id, DocumentStatus document_status, [[maybe_unused]]int rating) { return document_status == status; });
+}
+
+std::vector<Document> SearchServer::FindTopDocuments(__pstl::execution::parallel_policy, const std::string_view raw_query, DocumentStatus status) const
+{
+    return FindTopDocuments(std::execution::par, raw_query, [status]([[maybe_unused]] int document_id, DocumentStatus document_status, [[maybe_unused]]int rating) { return document_status == status; });
+}
+
 
 //=================================================================================
 int SearchServer::GetDocumentCount() const {
@@ -113,7 +125,7 @@ std::tuple<std::vector<std::string_view>, DocumentStatus> SearchServer::MatchDoc
 {
     CheckDocumentIdExistence(document_id);
 
-    const Query query = ParseQuery(raw_query);     // FIXED
+    const Query &query = ParseQuery(raw_query);     // FIXED
     std::vector<std::string_view> matched_words;
 
     const auto &document_words = documents_.at(document_id).text;
@@ -144,7 +156,7 @@ std::tuple<std::vector<std::string_view>, DocumentStatus> SearchServer::MatchDoc
 {
     CheckDocumentIdExistence(document_id);
 
-    const Query &query = ParseQuery(std::execution::par, raw_query);    // FIXED
+    const Query &query = ParseQuery(raw_query);    // FIXED
 
     const auto check_word = [&document_id, this](const auto& word) {
         return document_to_word_freqs.at(document_id).count(word) > 0;
@@ -256,12 +268,6 @@ double SearchServer::ComputeWordInverseDocumentFreq(std::string_view word) const
 
 //=================================================================================
 SearchServer::Query SearchServer::ParseQuery(const std::string_view text) const {
-    return ParseQuery(std::execution::seq, text);   // FIXED
-}
-
-//=================================================================================
-SearchServer::Query SearchServer::ParseQuery([[maybe_unused]] const std::execution::sequenced_policy &policy, const std::string_view text) const
-{
     Query query;
 
     for (const std::string_view word : SplitIntoWords(text)) {
@@ -276,32 +282,6 @@ SearchServer::Query SearchServer::ParseQuery([[maybe_unused]] const std::executi
     }
 
     return query;
-}
-
-//=================================================================================
-SearchServer::Query SearchServer::ParseQuery([[maybe_unused]] const std::execution::parallel_policy &policy, const std::string_view text) const
-{
-    std::vector<std::string_view> words = SplitIntoWordsNoStop(text);
-
-    std::vector<std::string_view> plus_words = words;
-    std::vector<std::string_view> minus_words = words;
-
-    plus_words.erase(std::remove_if(plus_words.begin(),
-                                    plus_words.end(),
-                                    [](auto word) { return word[0] == '-'; }),
-                           plus_words.end());
-
-    minus_words.erase(std::remove_if(minus_words.begin(),
-                                    minus_words.end(),
-                                    [](auto word) { return word[0] != '-'; }),
-                            minus_words.end());
-
-    std::transform(minus_words.begin(),
-                   minus_words.end(),
-                   minus_words.begin(),
-                   [](auto word) { return word.substr(1); });
-
-    return {plus_words, minus_words};
 }
 
 //=================================================================================

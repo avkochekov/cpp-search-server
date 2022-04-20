@@ -1,7 +1,7 @@
 #include "log_duration.h"
 
 //=================================================================================
-LogDuration::LogDuration(const std::string &id, std::ostream &stream) : stream(stream), id_(id) {}
+LogDuration::LogDuration(const std::string_view &id, std::ostream &stream) : stream(stream), id_(id) {}
 
 //=================================================================================
 LogDuration::~LogDuration() {
