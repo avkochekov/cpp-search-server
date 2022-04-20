@@ -191,15 +191,13 @@ inline std::vector<Document> SearchServer::FindAllDocuments(const __pstl::execut
 
     const std::map<int, double>& ord_map = document_to_relevance.BuildOrdinaryMap();
     std::vector<Document> matched_documents(ord_map.size());
-    std::atomic_int size = 0;
-    std::for_each(std::execution::par,
-                  ord_map.begin(), ord_map.end(),
-                  [&matched_documents, this, &size](const auto& map)
+    std::transform(std::execution::par,
+                   ord_map.begin(), ord_map.end(),
+                   matched_documents.begin(),
+                   [this](const auto &pair)
     {
-        matched_documents[size++] = {map.first, map.second, documents_.at(map.first).rating};
+        return Document(pair.first, pair.second, documents_.at(pair.first).rating);
     });
-
-    matched_documents.resize(size);
 
     return matched_documents;
 }
